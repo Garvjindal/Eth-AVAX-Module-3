@@ -1,0 +1,101 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract DigitalAsset {
+    string public assetName;
+    string public assetSymbol;
+    uint8 public assetDecimals;
+    uint256 public assetTotalSupply;
+    address public admin;
+
+    mapping(address => uint256) public accountBalances;
+    mapping(address => mapping(address => uint256)) public spendingAllowances;
+
+    event AssetTransfer(address indexed sender, address indexed receiver, uint256 amount);
+    event AssetApproval(address indexed assetOwner, address indexed spender, uint256 amount);
+    event AssetMint(address indexed recipient, uint256 amount);
+    event AssetBurn(address indexed holder, uint256 amount);
+
+    modifier onlyAdmin {
+        require(msg.sender == admin, "Only the admin can perform this action");
+        _;
+    }
+
+    constructor(string memory _assetName, string memory _assetSymbol, uint8 _assetDecimals, uint256 _initialSupply) {
+        assetName = _assetName;
+        assetSymbol = _assetSymbol;
+        assetDecimals = _assetDecimals;
+        assetTotalSupply = _initialSupply * 10**uint256(_assetDecimals);
+        admin = msg.sender;
+        accountBalances[admin] = assetTotalSupply;
+    }
+
+    function sendAsset(address _receiver, uint256 _amount) external {
+        require(_receiver != address(0), "Invalid receiver address");
+        require(accountBalances[msg.sender] >= _amount, "Insufficient balance");
+
+        accountBalances[msg.sender] -= _amount;
+        accountBalances[_receiver] += _amount;
+
+        emit AssetTransfer(msg.sender, _receiver, _amount);
+    }
+
+    function authorizeSpender(address _spender, uint256 _amount) external {
+        require(_spender != address(0), "Invalid spender address");
+
+        spendingAllowances[msg.sender][_spender] = _amount;
+
+        emit AssetApproval(msg.sender, _spender, _amount);
+    }
+
+    function spendFrom(address _sender, address _receiver, uint256 _amount) external {
+        require(_sender != address(0), "Invalid sender address");
+        require(_receiver != address(0), "Invalid receiver address");
+        require(accountBalances[_sender] >= _amount, "Insufficient balance");
+        require(spendingAllowances[_sender][msg.sender] >= _amount, "Allowance exceeded");
+
+        accountBalances[_sender] -= _amount;
+        accountBalances[_receiver] += _amount;
+        spendingAllowances[_sender][msg.sender] -= _amount;
+
+        emit AssetTransfer(_sender, _receiver, _amount);
+    }
+
+    function createAsset(address _recipient, uint256 _amount) external onlyAdmin {
+        require(_recipient != address(0), "Invalid recipient address");
+        require(_amount > 0, "Mint amount must be greater than zero");
+
+        assetTotalSupply += _amount;
+        accountBalances[_recipient] += _amount;
+
+        emit AssetMint(_recipient, _amount);
+    }
+
+    function destroyAsset(uint256 _amount) external {
+        require(accountBalances[msg.sender] >= _amount, "Insufficient balance");
+        require(_amount > 0, "Burn amount must be greater than zero");
+
+        assetTotalSupply -= _amount;
+        accountBalances[msg.sender] -= _amount;
+
+        emit AssetBurn(msg.sender, _amount);
+    }
+
+    function increaseSpendingAllowance(address _spender, uint256 _addedAmount) external {
+        require(_spender != address(0), "Invalid spender address");
+
+        spendingAllowances[msg.sender][_spender] += _addedAmount;
+
+        emit AssetApproval(msg.sender, _spender, spendingAllowances[msg.sender][_spender]);
+    }
+
+    function decreaseSpendingAllowance(address _spender, uint256 _subtractedAmount) external {
+        require(_spender != address(0), "Invalid spender address");
+        uint256 currentAllowance = spendingAllowances[msg.sender][_spender];
+        require(currentAllowance >= _subtractedAmount, "Decreased allowance below zero");
+
+        spendingAllowances[msg.sender][_spender] = currentAllowance - _subtractedAmount;
+
+        emit AssetApproval(msg.sender, _spender, spendingAllowances[msg.sender][_spender]);
+    }
+}
