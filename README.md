@@ -1,67 +1,84 @@
-# MyToken Smart Contract
+ # Deploy Smart Contract on Hardhat network and access it through Remix IDE
 
-This smart contract implements a basic ERC-20 token with minting and burning functionalities. The token contract is implemented in Solidity and is compatible with the Ethereum blockchain.
+This project is a part of Metacrafters ETH+AVAX course assessment.
+
+In this project, we had to create a custom token using a smart contract, deploy it on the local hardhat network, and use Remix IDE to interact with it.
+# divneettoken
+
+This repository contains the Solidity smart contract for the KiranjotToken (KJT), an ERC20 token. The contract is implemented using OpenZeppelin's libraries for security and best practices.
+
+## Contract Details
+
+- **Token Name:** Naman
+- **Token Symbol:** NHT
 
 ## Features
 
-- **Token Name:** Configurable token name
-- **Token Symbol:** Configurable token symbol
-- **Decimals:** Configurable decimal places
-- **Total Supply:** Initial supply set during contract deployment
-- **Ownership:** Owner has exclusive rights to mint new tokens
-- **Transfer:** Allows transferring tokens between addresses
-- **Minting:** Owner can mint new tokens
-- **Burning:** Any user can burn their tokens
+1. **Minting:** Only the owner of the contract can mint new tokens.
+2. **Burning:** Any token holder can burn their tokens.
+3. **Balance Query:** Get the balance of a specific address.
 
-## Functions
+## Dependencies
 
-### `constructor`
-The constructor initializes the contract with the specified parameters:
-- `_name`: The name of the token
-- `_symbol`: The symbol of the token
-- `_decimals`: The number of decimal places
-- `_initialSupply`: The initial supply of the token
+The contract uses OpenZeppelin's ERC20 and Ownable contracts. Ensure you have OpenZeppelin contracts installed in your project.
+# Contract code
 
-### `transfer`
-Allows the transfer of tokens from the sender's address to another address.
-- `_to`: The recipient address
-- `_value`: The amount of tokens to transfer
+     // SPDX-License-Identifier: MIT
+     pragma solidity ^0.8.18;
 
-### `mint`
-Allows the owner to mint new tokens.
-- `_to`: The address to receive the minted tokens
-- `_value`: The amount of tokens to mint
+    import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+    import "@openzeppelin/contracts/access/Ownable.sol";
 
-### `burn`
-Allows any user to burn their tokens.
-- `_value`: The amount of tokens to burn
+    contract KiranjotToken is ERC20, Ownable(msg.sender) {
+    constructor() ERC20("Kiran jot", "KJT") {
+       
+    }
 
-## Events
+    // Override the OpenZeppelin mint function to restrict it to the owner
+    function mint(address to, uint256 amount) external onlyOwner {
+        _mint(to, amount);
+    }
 
-### `Transfer`
-Triggered when tokens are transferred from one address to another.
-- `from`: The sender address
-- `to`: The recipient address
-- `value`: The amount of tokens transferred
+    // Function to burn tokens from the caller's balance
+    function burn(uint256 amount) external {
+        _burn(msg.sender, amount);
+    }
 
-### `Mint`
-Triggered when new tokens are minted.
-- `to`: The recipient address
-- `value`: The amount of tokens minted
+    // Additional function to get the balance of a specific address
+    function getBalance(address account) external view returns (uint256) {
+        return balanceOf(account);
+    }
+}
 
-### `Burn`
-Triggered when tokens are burned.
-- `from`: The address from which the tokens are burned
-- `value`: The amount of tokens burned
 
 ## Usage
 
-To deploy and interact with this contract, you will need a Solidity development environment such as Remix, Truffle, or Hardhat. Here is a basic example of how to deploy the contract:
 
-1. Open Remix IDE or your preferred Solidity development environment.
-2. Copy and paste the smart contract code into a new file.
-3. Compile the contract.
-4. Deploy the contract with the desired parameters (name, symbol, decimals, initial supply).
-5. Interact with the contract using the provided functions (transfer, mint, burn).
+Deploying the Contract
+To deploy the contract, use your preferred Ethereum development environment, such as Truffle, Hardhat, or Remix.
 
+Minting Tokens
+Only the owner of the contract can mint new tokens.
 
+## solidity
+
+function mint(address to, uint256 amount) external onlyOwner {
+    _mint(to, amount);
+}
+
+# Burning Tokens
+Any token holder can burn their tokens.
+
+## solidity
+
+function burn(uint256 amount) external {
+    _burn(msg.sender, amount);
+}
+## Checking Balances
+You can check the balance of any address using the getBalance function.
+
+function getBalance(address account) external view returns (uint256) {
+    return balanceOf(account);
+}
+
+### Author: Garv Jindal
