@@ -3,14 +3,14 @@
 This project is a part of Metacrafters ETH+AVAX course assessment.
 
 In this project, we had to create a custom token using a smart contract, deploy it on the local hardhat network, and use Remix IDE to interact with it.
-# divneettoken
+# Garvtoken
 
 This repository contains the Solidity smart contract for the KiranjotToken (KJT), an ERC20 token. The contract is implemented using OpenZeppelin's libraries for security and best practices.
 
 ## Contract Details
 
-- **Token Name:** Naman
-- **Token Symbol:** NHT
+- **Token Name:** Garv
+- **Token Symbol:** JINDAL
 
 ## Features
 
@@ -29,7 +29,7 @@ The contract uses OpenZeppelin's ERC20 and Ownable contracts. Ensure you have Op
     import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
     import "@openzeppelin/contracts/access/Ownable.sol";
 
-    contract KiranjotToken is ERC20, Ownable(msg.sender) {
+    contract GarvToken is ERC20, Ownable(msg.sender) {
     constructor() ERC20("Kiran jot", "KJT") {
        
     }
